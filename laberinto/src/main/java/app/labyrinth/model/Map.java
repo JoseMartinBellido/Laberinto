@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import app.labyrinth.model.exeptions.MapException;
+
 /**
  * Map where the game is played. It consists in a labyrinth bordered and composed by walls, 
  * with a player and the end (objective to reach)
@@ -37,14 +39,14 @@ public class Map {
     System.out.println("Map created correctly");
   }
   
-  
+ 
   /**
    * Read the file and retrieve all the lines of the map in a list
    * @return A list containing all the characters of the map
    * 
    * @throws MapException In case any problem occurs during the process
    */
-  public List<String> getMap(){
+  public List<String> getMapLines(){
     
     try {
       return Files.readAllLines(mapPath);
@@ -107,7 +109,7 @@ public class Map {
           // Determines the type of the element depending on the char
           mapArray[i][j] = switch (elements[j]) {
           case '\s' -> Element.VOID;
-          case '*' -> Element.PLAYER;
+          case 'P' -> Element.PLAYER;
           case 'F' -> Element.END;
           default -> Element.OBSTACLE;
           };  

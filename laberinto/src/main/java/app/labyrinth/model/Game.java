@@ -1,8 +1,11 @@
 package app.labyrinth.model;
 
 import java.nio.file.Path;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import app.labyrinth.model.exeptions.GameException;
 
 /**
  * Complete game which defines the strategy to follow in the labrynth
@@ -14,6 +17,16 @@ public class Game {
    * travel 1 square
    */
   private static final double INITIAL_VELOCITY = 1.0;
+  
+  /**
+   * Maximum velocity the player can achieve going straight line
+   */
+  private static final double MAX_VELOCITY = 0.6;
+  
+  /**
+   * Acceleration gained while going in a straight line for 1 square
+   */
+  private static final double STRAIGHT_ACCELERATION = 0.1;
   
   /**
    * Map used for the game
@@ -30,6 +43,11 @@ public class Game {
    */
   private double timeSpentPerSquare;
   
+  /**
+   * Time spent calculating the route
+   */
+  private long timeSpentCalculatingRoute;
+  
   
   /**
    * Constructor of the class which sets up the map for the game
@@ -42,6 +60,53 @@ public class Game {
     timeSpentPerSquare = 0;
   }
   
+  /**
+   * Gets the complete route from the beginning to the end of the labyrinth
+   * @return The complete route to exit the labyrinth
+   */
+  public List<Coordinate> getRoute() {
+    return route;
+  }
+  
+  /**
+   * Gets the total time spent while calculating the route
+   * @return The total time spent while calculating the route in ns (nanoseconds)
+   */
+  public long getTimeSpentCalculatingRoute() {
+    return timeSpentCalculatingRoute;
+  }
+  
+  /**
+   * Gets the map of the game
+   * @return The map of the game
+   */
+  public Map getMap() {
+    return map;
+  }
+  
+  /**
+   * Calculates the most effective route from the beginning of the labyrinth to the end, 
+   * stablishing the time required to achieve it
+   */
+  public void calculateRoute() {
+    
+    // Time at the beggining of the algorithm
+    LocalTime startTime = LocalTime.now();
+    
+    //  ------------------------- INSERT HERE THE CODE TO RUN IN THE GAME --------------------
+    
+    
+    
+    
+    //  ------------------------- END OF THE CODE TO RUN IN THE GAME -------------------------
+    
+    // Time at the end of the algorithm and time calculation
+    LocalTime endTime = LocalTime.now();
+    timeSpentCalculatingRoute = endTime.toNanoOfDay() - startTime.toNanoOfDay();
+    
+    System.out.println("Route calculated correctly");
+    
+  }
   
   /**
    * Gets the total time the player spents in the labyrinth with the selected route
@@ -72,6 +137,8 @@ public class Game {
         timeSpent += timeSpentPerSquare;
       }
       
+      System.out.println("Total time spent calculated correctly");
+      
       return timeSpent;
       
     // In case there is an error with de route
@@ -99,7 +166,7 @@ public class Game {
         (first.y() == previous.y() && previous.y() == current.y())) {
       
       // Going straight reduces up to 0.4, so timeSpentPerSquare can't be lesser than 0.6
-      timeSpentPerSquare -= (timeSpentPerSquare > 0.6) ? 0.1 : 0;
+      timeSpentPerSquare -= (timeSpentPerSquare > MAX_VELOCITY) ? STRAIGHT_ACCELERATION : 0;
     
     // Resets if there is a turn recently
     } else {
