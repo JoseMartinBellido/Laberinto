@@ -31,7 +31,7 @@ public class Game {
   /**
    * Map used for the game
    */
-  private Map map;
+  private LabyrinthMap map;
   
   /**
    * List of coordinates with de stablished route to follow in the labyrinth
@@ -48,14 +48,21 @@ public class Game {
    */
   private long timeSpentCalculatingRoute;
   
+  /**
+   * Number of movements after doing a turn
+   */
+  private int movementsAfterATurn;
+  
   
   /**
    * Constructor of the class which sets up the map for the game
    * @param mapPath Path of the txt file that contains the map made by ascii characters
+   * 
+   * @throws MapException In case there is a problem processing the map
    */
   public Game(Path mapPath) {
     // Initializes the map, the route and the stating velocity
-    map = new Map(mapPath);
+    map = new LabyrinthMap(mapPath);
     route = new ArrayList<>();
     timeSpentPerSquare = 0;
   }
@@ -80,10 +87,31 @@ public class Game {
    * Gets the map of the game
    * @return The map of the game
    */
-  public Map getMap() {
+  public LabyrinthMap getMap() {
     return map;
   }
   
+  
+  // -- Methods created only to make tests work --
+  
+  /**
+   * Sets a new map
+   * @param map Map to introduce in the game
+   */
+  public void setMap(LabyrinthMap map) {
+    this.map = map;
+  }
+
+  /**
+   * Sets a new Route to follow in the game
+   * @param route Route to follow in the game
+   */
+  public void setRoute(List<Coordinate> route) {
+    this.route = route;
+  }
+  
+  // --  --
+
   /**
    * Calculates the most effective route from the beginning of the labyrinth to the end, 
    * stablishing the time required to achieve it
@@ -115,26 +143,35 @@ public class Game {
    * 
    * @throws GameException In case the route is empty or the route is wrong
    */
-  public double getTotalTimeSpent(List<Coordinate> route) {
+  public double getTotalTimeSpent() {
     
-    // Check if the start and the end point are in the list
-    if (!route.contains(map.getElementCoordinates(Element.END)) || 
-        !route.contains(map.getElementCoordinates(Element.PLAYER))) {
+    // Checks that the route has the player initial coordinates and the end coordinates
+    if (!route.contains(map.getElementCoordinates(Element.PLAYER)) || 
+        !route.contains(map.getElementCoordinates(Element.END))) {
       throw new GameException();
     }
     
     // If the player goes straight, he will go faster so the time per square reduces 0.1 up to 0.4.
-    // 3 squares traveled to start going faster
+    // 2 squares traveled to start going faster. It applies in the third one
     // If he encounters a turn, the velocity will reset to 1.0
     try {
       timeSpentPerSquare = INITIAL_VELOCITY;
       double timeSpent = INITIAL_VELOCITY * 2;
       
-      for (int i = 2; i < route.size(); i++) {
+      movementsAfterATurn = 2;
+      
+      for (int i = 2; i < route.size(); i++) {  
+        // Add a movement. If it's a turn, it resets in the next line
+        movementsAfterATurn++;
+        
         modifyVelocityIfGoesStraight(i);
+        
+        // This method avoids precision problems
+        timeSpentPerSquare = roundDoubleToOneDecimalDigit(timeSpentPerSquare);
         
         // Adds the time spent in this square
         timeSpent += timeSpentPerSquare;
+        timeSpent = roundDoubleToOneDecimalDigit(timeSpent);
       }
       
       System.out.println("Total time spent calculated correctly");
@@ -161,17 +198,28 @@ public class Game {
     Coordinate previous = route.get(routePosition - 1);
     Coordinate current = route.get(routePosition);
     
-    // Check if the player is going straight because 1 coordinate is maintained
+    // Check if the player makes a turn
     if ((first.x() == previous.x() && previous.x() == current.x()) || 
         (first.y() == previous.y() && previous.y() == current.y())) {
-      
-      // Going straight reduces up to 0.4, so timeSpentPerSquare can't be lesser than 0.6
-      timeSpentPerSquare -= (timeSpentPerSquare > MAX_VELOCITY) ? STRAIGHT_ACCELERATION : 0;
+            
+      if (movementsAfterATurn > 2) {
+        // Going straight reduces up to 0.4, so timeSpentPerSquare can't be lesser than 0.6
+        timeSpentPerSquare -= (timeSpentPerSquare > MAX_VELOCITY) ? STRAIGHT_ACCELERATION : 0;
+      }
     
     // Resets if there is a turn recently
     } else {
       timeSpentPerSquare = INITIAL_VELOCITY;
+      movementsAfterATurn = 1;
     }    
+  }
+  
+  /**
+   * Rounds a double number to have only 1 decimal digit
+   * @param number Number to round
+   */
+  private double roundDoubleToOneDecimalDigit(double number) {
+    return Math.round(number * 10) / 10.0;
   }
   
 }

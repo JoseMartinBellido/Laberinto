@@ -181,7 +181,7 @@ public class App {
         String.format("%,d ns",game.getTimeSpentCalculatingRoute()));
     
     lblTimeSpentSolvingLabyrinth.setText(
-        String.format("%,f s", game.getTotalTimeSpent(route)));
+        String.format("%,f s", game.getTotalTimeSpent()));
  
     System.out.println("Game executed without errors");
   }

@@ -9,7 +9,7 @@ public enum Element {
   OBSTACLE((char) Character.OTHER_SYMBOL),
   END('F'),
   VOID('\s'),
-  TRAVELED('*');
+  TRAVELLED('*');
   
   /**
    * Representation of the enum in the map

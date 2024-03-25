@@ -11,7 +11,7 @@ import app.labyrinth.model.exeptions.MapException;
  * Map where the game is played. It consists in a labyrinth bordered and composed by walls, 
  * with a player and the end (objective to reach)
  */
-public class Map {
+public class LabyrinthMap {
   
   /**
    * The map representated by a bidimensional array
@@ -28,8 +28,10 @@ public class Map {
    * Constructor of the class. Creates a map using the path of a txt file with a labyrinth made by
    * ascii characters
    * @param mapPath path of the txt file that contains the map
+   * 
+   * @throws MapException In case there is a problem processing the map
    */
-  public Map(Path mapPath) {
+  public LabyrinthMap(Path mapPath) {
     this.mapPath = mapPath;
     
     // Sets the map using the txt file path
@@ -87,6 +89,15 @@ public class Map {
   }
   
   /**
+   * Gets the element of the map allocated on the given coordinate
+   * @param coordinate Coordinate to check the element in
+   * @return The element allocated on the given coordinate
+   */
+  public Element getElementAtCoordinate(Coordinate coordinate) {
+    return mapArray[coordinate.x()][coordinate.y()];
+  }
+  
+  /**
    * Reads the map from a file and stablish all the required elements in the class
    *  
    * @throws MapException In case any problem occurs during the process
@@ -111,6 +122,8 @@ public class Map {
           case '\s' -> Element.VOID;
           case 'P' -> Element.PLAYER;
           case 'F' -> Element.END;
+          // This case is specified not to mismatch '*' with OBSTACLE in testing
+          case '*' -> Element.TRAVELLED;
           default -> Element.OBSTACLE;
           };  
         }

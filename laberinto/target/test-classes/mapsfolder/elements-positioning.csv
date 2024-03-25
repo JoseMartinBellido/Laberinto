@@ -1,0 +1,12 @@
+x (horizontal Coordinate), y (vertical Coordinate), Element
+0, 0, OBSTACLE
+0, 2, OBSTACLE
+2, 10, OBSTACLE
+0, 10, OBSTACLE
+0, 5, OBSTACLE
+2, 5, OBSTACLE
+1, 1, TRAVELLED
+1, 2, TRAVELLED
+1, 3, TRAVELLED
+1, 4, PLAYER
+1, 9, END
