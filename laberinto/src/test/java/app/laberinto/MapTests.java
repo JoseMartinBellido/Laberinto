@@ -3,6 +3,7 @@ package app.laberinto;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 import app.labyrinth.model.Coordinate;
 import app.labyrinth.model.Element;
 import app.labyrinth.model.LabyrinthMap;
+import app.labyrinth.model.MovementDirection;
 import app.labyrinth.model.exeptions.MapException;
 
 /**
@@ -89,6 +91,30 @@ class MapTests {
     Element element = Element.valueOf(elementStr);
     
     assertEquals(new Coordinate(x, y), map.getElementCoordinates(element));
+  }
+  
+  
+  @Test
+  void getSurroundingElementsTest() {
+    LabyrinthMap map = new LabyrinthMap(TESTING_MAP_PATH);
+    
+    // Getting the player to look around
+    Coordinate player = map.getElementCoordinates(Element.PLAYER);
+    Map<MovementDirection, Element> surroundingElements = map.getSurroundingElements(player);
+    
+    // Check all the elements
+
+    // UP
+    assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.UP));
+    assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.UP_RIGHT));
+    assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.UP_LEFT));
+    // DOWN
+    assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.DOWN));
+    assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.DOWN_LEFT));
+    assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.DOWN_RIGHT));
+    // RIGHT and LEFT
+    assertEquals(Element.VOID, surroundingElements.get(MovementDirection.RIGHT));
+    assertEquals(Element.TRAVELLED, surroundingElements.get(MovementDirection.LEFT));
   }
   
 }

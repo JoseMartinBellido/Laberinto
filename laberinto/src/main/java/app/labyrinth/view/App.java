@@ -215,7 +215,7 @@ public class App {
       char[] line = mapLines.get(i).toCharArray();
       
       for (int j = 0; j < line.length; j++) {
-        mapStr.append((route.contains(new Coordinate(i, j))) ? '*' : line[j]);
+        mapStr.append((route.contains(new Coordinate(j, i))) ? '*' : line[j]);
       }
       mapStr.append("\n\s\s");
       

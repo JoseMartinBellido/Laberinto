@@ -3,7 +3,9 @@ package app.labyrinth.model;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import app.labyrinth.model.exeptions.MapException;
 
@@ -12,6 +14,14 @@ import app.labyrinth.model.exeptions.MapException;
  * with a player and the end (objective to reach)
  */
 public class LabyrinthMap {
+  
+  /**
+   * All the directions the player can possible move in the labyrinth
+   */
+  private static final MovementDirection[] directions = {MovementDirection.UP, 
+      MovementDirection.UP_LEFT, MovementDirection.UP_RIGHT, MovementDirection.RIGHT, 
+      MovementDirection.LEFT, MovementDirection.DOWN, MovementDirection.DOWN_LEFT,  
+      MovementDirection.DOWN_RIGHT};
   
   /**
    * The map representated by a bidimensional array
@@ -58,6 +68,16 @@ public class LabyrinthMap {
     }
   }
   
+  public Element[][] getMapArray() {
+    return mapArray;
+  }
+
+
+  public void setMapArray(Element[][] mapArray) {
+    this.mapArray = mapArray;
+  }
+
+
   /**
    * Gets the element's position in the map (player or end coordinates)
    * @param searchedElement Element whose position is required. It should be the player or the end of
@@ -80,7 +100,7 @@ public class LabyrinthMap {
       for (int j = 0; j < row.length; j++) {
         // If the element is found
         if (row[j].equals(searchedElement)){
-          return new Coordinate(i, j);
+          return new Coordinate(j, i);
         }
       }
     }
@@ -94,7 +114,31 @@ public class LabyrinthMap {
    * @return The element allocated on the given coordinate
    */
   public Element getElementAtCoordinate(Coordinate coordinate) {
-    return mapArray[coordinate.x()][coordinate.y()];
+    return mapArray[coordinate.y()][coordinate.x()];
+  }
+  
+  /**
+   * Gets all the surrounding elements of a given coordinate. 
+   * @param coordinate Coordinate to look elements from around
+   * @return A map which key is the movement direction and the value the element asociated
+   */
+  public Map<MovementDirection, Element> getSurroundingElements(Coordinate coordinate) {
+    
+    // It's not possible to throw an out of bounds exception, given that this method will be 
+    // called only from the player to move
+    
+    Map<MovementDirection, Element> surroundingElements = new HashMap<>();
+    
+    // Adds all the movement directions and the elements associated
+    for (MovementDirection direction : directions) {
+      surroundingElements.put(direction, 
+          getElementAtCoordinate(new Coordinate(coordinate.x() + direction.getXMovement()
+          , coordinate.y() + direction.getYMovement())));
+    }
+    
+
+    return surroundingElements;
+
   }
   
   /**
