@@ -7,9 +7,9 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTextArea;
 
-import app.labyrinth.controller.LabyrinthFileManager;
 import app.labyrinth.model.Coordinate;
 import app.labyrinth.model.Game;
+import app.labyrinth.model.LabyrinthFileManager;
 import app.labyrinth.model.exceptions.GameException;
 
 import javax.swing.JButton;

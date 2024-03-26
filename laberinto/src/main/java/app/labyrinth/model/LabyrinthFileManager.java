@@ -1,4 +1,4 @@
-package app.labyrinth.controller;
+package app.labyrinth.model;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

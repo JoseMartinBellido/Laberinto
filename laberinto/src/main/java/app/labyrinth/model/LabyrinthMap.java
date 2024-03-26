@@ -6,7 +6,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import app.labyrinth.controller.LabyrinthFileManager;
 import app.labyrinth.model.exceptions.MapException;
 
 /**

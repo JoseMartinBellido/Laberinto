@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
-import app.labyrinth.controller.LabyrinthFileManager;
 import app.labyrinth.model.Coordinate;
 import app.labyrinth.model.Element;
+import app.labyrinth.model.LabyrinthFileManager;
 import app.labyrinth.model.LabyrinthMap;
 import app.labyrinth.model.MovementDirection;
 import app.labyrinth.model.exceptions.MapException;
