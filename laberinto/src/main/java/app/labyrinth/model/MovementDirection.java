@@ -1,5 +1,9 @@
 package app.labyrinth.model;
 
+/**
+ * Movement direction the player can go to in the labyrinth. Associated with the X and Y axis 
+ * interaction the movement will bring about to the position (Coordinates)
+ */
 public enum MovementDirection {
   UP(0, 1), 
   UP_RIGHT(1, 1),
@@ -21,7 +25,7 @@ public enum MovementDirection {
   private int yMovement;
   
   /**
-   * Constructor of the class with all the movements done by the player
+   * Constructor of the class with all the movements done by the player due to the direction selected
    * @param xMovement The quantity of squares the player moves in the X axis
    * @param yMovement The quantity of squares the player moves in the Y axis
    */

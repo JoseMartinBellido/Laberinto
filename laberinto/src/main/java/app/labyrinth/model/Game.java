@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import app.labyrinth.model.exeptions.GameException;
+import app.labyrinth.model.exceptions.GameException;
+import app.labyrinth.model.utils.MathUtils;
 
 /**
  * Complete game which defines the strategy to follow in the labrynth
@@ -26,7 +27,7 @@ public class Game {
   private static final double MAX_VELOCITY = 0.6;
   
   /**
-   * Acceleration gained while going in a straight line for 1 square
+   * Acceleration gained while going in a straight line for 1 square.
    */
   private static final double STRAIGHT_ACCELERATION = 0.1;
   
@@ -36,12 +37,12 @@ public class Game {
   private LabyrinthMap map;
   
   /**
-   * List of coordinates with de stablished route to follow in the labyrinth
+   * Final list of coordinates with de stablished route to follow in the labyrinth
    */
   private List<Coordinate> route;
   
   /**
-   * Time spent per square in the map
+   * Time spent per square in the map. It will start at the INITIAL_VELOCITY
    */
   private double timeSpentPerSquare;
   
@@ -51,13 +52,24 @@ public class Game {
   private long timeSpentCalculatingRoute;
   
   /**
-   * Number of movements after doing a turn
+   * Number of movements after doing a turn. It will count the number of squares in the same line
+   * to apply the acceleration in the formula.
    */
   private int movementsAfterATurn;
   
   /**
-   * Map of intersection coordinates in conjunction with a list of unexplored ways found in the
-   * labyrinth
+   * Players coordinates in the game
+   */
+  private Coordinate playerCoordinate;
+  
+  
+  // ------------------------- Personal implementation -------------------------
+  
+  /**
+   * Map of intersection coordinates associated with a list of unexplored ways found in the
+   * labyrinth.
+   * For example, if the intersection connects with 3 different ways, 1 of them already explored, 
+   * the 2 remaining coordinates to go will be kept in the associated coordinate list
    */
   private Map<Coordinate, List<Coordinate>> intersections;
   
@@ -67,10 +79,7 @@ public class Game {
    */
   private List<Coordinate> recognition;
   
-  /**
-   * Players coordinates in the game
-   */
-  private Coordinate playerCoordinate;
+  // ---------------------------------------------------------------------------
   
   /**
    * Constructor of the class which sets up the map for the game
@@ -79,7 +88,7 @@ public class Game {
    * @throws MapException In case there is a problem processing the map
    */
   public Game(Path mapPath) {
-    // Initializes the map, the route and the stating velocity
+    // Initializes the map, the routes (final route and recognition route) and the starting velocity
     map = new LabyrinthMap(mapPath);
     route = new ArrayList<>();
     recognition = new ArrayList<>();
@@ -87,8 +96,8 @@ public class Game {
   }
   
   /**
-   * Gets the complete route from the beginning to the end of the labyrinth
-   * @return The complete route to exit the labyrinth
+   * Gets the complete route from the beginning to the end of the maze
+   * @return The complete route to exit the maze
    */
   public List<Coordinate> getRoute() {
     return route;
@@ -111,7 +120,7 @@ public class Game {
   }
   
   
-  // -- Methods created only to make tests work --
+  // -- Methods created only to make tests work. Not a good practice but helpful to check functioning --
   
   /**
    * Sets a new map
@@ -137,20 +146,21 @@ public class Game {
    * @param route List of coordinates the player will travel to reach the end of the map
    * @return The time spent by the player to reach the objective
    * 
-   * @throws GameException In case the route is empty or the route is wrong
+   * @throws GameException In case the route is empty/wrong
    */
   public double getTotalTimeSpent() {
     
     // Checks that the route has the player initial coordinates and the end coordinates
-    if (!route.contains(map.getElementCoordinates(Element.PLAYER)) || 
-        !route.contains(map.getElementCoordinates(Element.END))) {
+    if (!route.contains(map.getCoordinateOfElement(Element.PLAYER)) || 
+        !route.contains(map.getCoordinateOfElement(Element.END))) {
       throw new GameException();
     }
     
     // If the player goes straight, he will go faster so the time per square reduces 0.1 up to 0.4.
     // 2 squares traveled to start going faster. It applies in the third one
-    // If he encounters a turn, the velocity will reset to 1.0
+    // If he makes a turn, the velocity will reset to 1.0
     try {
+      // Set up the variables. Obviously, the first 2 travelled squares are in the same line
       timeSpentPerSquare = INITIAL_VELOCITY;
       double timeSpent = INITIAL_VELOCITY * 2;
       
@@ -163,11 +173,11 @@ public class Game {
         modifyVelocityIfGoesStraight(i);
         
         // This method avoids precision problems
-        timeSpentPerSquare = roundDoubleToOneDecimalDigit(timeSpentPerSquare);
+        timeSpentPerSquare = MathUtils.roundDoubleToOneDecimalDigit(timeSpentPerSquare);
         
-        // Adds the time spent in this square
+        // Adds the time spent in this square and rounds it to 1 decimal digit
         timeSpent += timeSpentPerSquare;
-        timeSpent = roundDoubleToOneDecimalDigit(timeSpent);
+        timeSpent = MathUtils.roundDoubleToOneDecimalDigit(timeSpent);
       }
       
       System.out.println("Total time spent calculated correctly");
@@ -195,10 +205,10 @@ public class Game {
     // My personal strategy is: try to go straight way. if it's possible, go.
     // If it's not, find the way to go as directly as possible calculating the squares of distance
     
-    playerCoordinate = map.getElementCoordinates(Element.PLAYER);
-    Coordinate endCoordinate = map.getElementCoordinates(Element.END);
+    playerCoordinate = map.getCoordinateOfElement(Element.PLAYER);
+    Coordinate endCoordinate = map.getCoordinateOfElement(Element.END);
     
-    // Map of intersections in case it's needed to go back because a dead end is found.
+    // Map of intersections in case it's needed to go backwards because a dead end is found.
     intersections = new HashMap<>();
     
     // The route starts with the player coordinates in the beginning
@@ -232,25 +242,26 @@ public class Game {
     Coordinate previous = route.get(routePosition - 1);
     Coordinate current = route.get(routePosition);
     
-    // Check if the player makes a turn
+    // Check if the player doesn't make a turn
     if ((first.x() == previous.x() && previous.x() == current.x()) || 
         (first.y() == previous.y() && previous.y() == current.y())) {
             
       if (movementsAfterATurn > 2) {
-        // Going straight reduces up to 0.4, so timeSpentPerSquare can't be lesser than 0.6
+        // Going straight reduces up to 0.4, so timeSpentPerSquare can't be lesser than 0.6 (MAX)
         timeSpentPerSquare -= (timeSpentPerSquare > MAX_VELOCITY) ? STRAIGHT_ACCELERATION : 0;
       }
     
-    // Resets if there is a turn recently
+    // Resets if the player makes a turn
     } else {
       timeSpentPerSquare = INITIAL_VELOCITY;
       movementsAfterATurn = 1;
     }    
   }
   
+  // ------------------------- Personal implementation -------------------------
   
   /**
-   * Moves the player as efficiently as possible through the labyrinth.
+   * Moves the player as efficiently as possible through the labyrinth
    */
   private void moveEfficiently() {
     
@@ -258,11 +269,11 @@ public class Game {
     List<Coordinate> coordinatesToGo = getPossibleCoordinatesToGo();
     
     // Check if it's the end of the labyrinth
-    if (coordinatesToGo.contains(map.getElementCoordinates(Element.END))) {
-      route.add(map.getElementCoordinates(Element.END));
+    if (coordinatesToGo.contains(map.getCoordinateOfElement(Element.END))) {
+      route.add(map.getCoordinateOfElement(Element.END));
     
     } else {
-      // If it's an intersection, adds it to the map with all the possible unexplored ways
+      // If it's an unsaved intersection, adds it to the map with all the possible unexplored ways
       if (coordinatesToGo.size() > 1 && !intersections.keySet().contains(playerCoordinate)) {
         intersections.put(playerCoordinate, coordinatesToGo);
       }
@@ -276,7 +287,8 @@ public class Game {
       // If the list is empty, the player gets back to the last intersection
       } else {
         // The player's coordinates will reset to the last intersection and repeats the process
-        playerCoordinate = getLastIntersection();
+        // until a way to move on is found
+        playerCoordinate = moveToLastIntersection();
         moveEfficiently();
       }
     }
@@ -292,7 +304,8 @@ public class Game {
     
     // Check the surrounding coordinates to go
     Map<MovementDirection, Element> surroundingElements = map.getSurroundingElements(playerCoordinate);
-    // Check for the best direction to move on
+    
+    // Check for a non-Obstacle direction to move on where the player has not been
     coordinatesToGo.addAll(surroundingElements.keySet()
         .stream()
         // Filters by no obstacle
@@ -310,12 +323,12 @@ public class Game {
   /**
    * Gets the optimal coordinates to proceed
    * @param coordinatesToGo List of coordinates on which to decide the most optimal to reach the end
-   * of the labyrinth. It has to not be empty 
-   * @return The optimal coordinates to proceed in the map
+   * of the labyrinth. It can't be empty 
+   * @return The optimal coordinate to proceed in the map
    */
   private Coordinate getOptimalWay(List<Coordinate> coordinatesToGo) {
     
-    // Gets the a distances list to the end of the labyrinth
+    // Gets the a distances list to the end of the labyrinth from the coordinate candidates to go
     List<Integer> distances = coordinatesToGo.stream()
         .map(this::getDirectDistanceToEnd)
         .toList();
@@ -328,10 +341,11 @@ public class Game {
   }
   
   /**
-   * Gets the last intersection and updates the intersections map
+   * Gets to the last intersection.
+   * Updates the intersections map (discarding this path) and the final route
    * @return The last intersection coordinate
    */
-  private Coordinate getLastIntersection() {
+  private Coordinate moveToLastIntersection() {
     
     // Search in the route the last intersection starting from the end of the route
     int routeSize = route.size();
@@ -342,7 +356,7 @@ public class Game {
         Coordinate lastIntersection = route.get(i);
         Coordinate deadEnd = route.get(i + 1);
         
-        // Update the intersections map, knowing this way leads to a dead end way
+        // Update the intersections map, knowing this way leads to dead end
         List<Coordinate> possibleWaysFromLastIntersection = intersections.get(lastIntersection);
         possibleWaysFromLastIntersection.remove(deadEnd);
         
@@ -361,24 +375,21 @@ public class Game {
   }
   
   /**
-   * Gets the distance going straight way from the player's coordinate to the end's coordinate
-   * @param playerCoordinate Player's coordinate in the labyrinth
+   * Gets the distance going straight way from the given coordinate to the end's coordinate
+   * @param coordinate Coordinate of the labyrinth to go from
    * @param endCoordinate End's coordinate in the labyrinth
    * @return The quantity of squares between the two both elements if it would be able to go in 
    * a straight line
    */
-  private int getDirectDistanceToEnd(Coordinate playerCoordinate) {
-    Coordinate endCoordinate = map.getElementCoordinates(Element.END);
-    return Math.abs(Math.abs(endCoordinate.y()) - Math.abs(playerCoordinate.y())) 
-        + Math.abs(Math.abs(endCoordinate.x()) - Math.abs(playerCoordinate.x()));
+  private int getDirectDistanceToEnd(Coordinate coordinate) {
+    // Check the end's coordinate
+    Coordinate endCoordinate = map.getCoordinateOfElement(Element.END);
+    
+    // distance = ||x2| - |x1|| + ||y2| - |y1||
+    return Math.abs(Math.abs(endCoordinate.y()) - Math.abs(coordinate.y())) 
+        + Math.abs(Math.abs(endCoordinate.x()) - Math.abs(coordinate.x()));
   }
 
-  /**
-   * Rounds a double number to have only 1 decimal digit
-   * @param number Number to round
-   */
-  private double roundDoubleToOneDecimalDigit(double number) {
-    return Math.round(number * 10) / 10.0;
-  }
+  // ---------------------------------------------------------------------------
   
 }

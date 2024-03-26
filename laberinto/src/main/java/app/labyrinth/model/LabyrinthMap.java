@@ -1,22 +1,22 @@
 package app.labyrinth.model;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import app.labyrinth.model.exeptions.MapException;
+import app.labyrinth.controller.LabyrinthFileManager;
+import app.labyrinth.model.exceptions.MapException;
 
 /**
- * Map where the game is played. It consists in a labyrinth bordered and composed by walls, 
- * with a player and the end (objective to reach)
+ * Map where the game is played. Basically, it consists in a labyrinth bordered and composed by walls, 
+ * a player and the end (objective to reach)
  */
 public class LabyrinthMap {
   
   /**
-   * All the directions the player can possible move in the labyrinth
+   * All the directions the player can possibly move in the labyrinth
    */
   private static final MovementDirection[] directions = {MovementDirection.UP, 
       MovementDirection.UP_LEFT, MovementDirection.UP_RIGHT, MovementDirection.RIGHT, 
@@ -24,55 +24,40 @@ public class LabyrinthMap {
       MovementDirection.DOWN_RIGHT};
   
   /**
-   * The map representated by a bidimensional array
+   * The map represented by a bidimensional array
    */
   private Element[][] mapArray;
-  
-  /**
-   * Path of the txt file that contains the map made by ascii characters
-   */
-  private Path mapPath;
   
   
   /**
    * Constructor of the class. Creates a map using the path of a txt file with a labyrinth made by
    * ascii characters
-   * @param mapPath path of the txt file that contains the map
+   * @param mapPath Path of the txt file that contains the maze
    * 
    * @throws MapException In case there is a problem processing the map
    */
   public LabyrinthMap(Path mapPath) {
-    this.mapPath = mapPath;
     
     // Sets the map using the txt file path
-    setInitialMap();
+    setInitialMap(mapPath);
     
-    // Logs an ok message
+    // Send an ok message
     System.out.println("Map created correctly");
   }
   
- 
-  /**
-   * Read the file and retrieve all the lines of the map in a list
-   * @return A list containing all the characters of the map
-   * 
-   * @throws MapException In case any problem occurs during the process
-   */
-  public List<String> getMapLines(){
-    
-    try {
-      return Files.readAllLines(mapPath);
-      
-    } catch (IOException e) {
-      throw new MapException();
-    }
-  }
   
+  /**
+   * Gets the labyrinth map array
+   * @return The labyrinth map array
+   */
   public Element[][] getMapArray() {
     return mapArray;
   }
 
-
+  /**
+   * Sets a labyrinth map array
+   * @param mapArray Game map array to set
+   */
   public void setMapArray(Element[][] mapArray) {
     this.mapArray = mapArray;
   }
@@ -87,7 +72,7 @@ public class LabyrinthMap {
    * @throws MapException If the element is not found in the map or an element different from 
    * the player or the end is tried to be found
    */
-  public Coordinate getElementCoordinates(Element searchedElement) {
+  public Coordinate getCoordinateOfElement(Element searchedElement) {
     
     // The only permitted elements to be searched are the player and the end
     if (!searchedElement.equals(Element.END) && !searchedElement.equals(Element.PLAYER)) {
@@ -125,9 +110,9 @@ public class LabyrinthMap {
   public Map<MovementDirection, Element> getSurroundingElements(Coordinate coordinate) {
     
     // It's not possible to throw an out of bounds exception, given that this method will be 
-    // called only from the player to move
+    // called only from the player to move and the maze is always bordered
     
-    Map<MovementDirection, Element> surroundingElements = new HashMap<>();
+    Map<MovementDirection, Element> surroundingElements = new EnumMap<>(MovementDirection.class);
     
     // Adds all the movement directions and the elements associated
     for (MovementDirection direction : directions) {
@@ -136,21 +121,20 @@ public class LabyrinthMap {
           , coordinate.y() + direction.getYMovement())));
     }
     
-
     return surroundingElements;
-
   }
   
   /**
    * Reads the map from a file and stablish all the required elements in the class
+   * @param mapPath path of the txt file that contains the map
    *  
    * @throws MapException In case any problem occurs during the process
    */
-  private void setInitialMap(){
+  private void setInitialMap(Path mapPath){
     
     try {
-      // Getting the column and row size to initialize the mapArray
-      List<String> allLines = Files.readAllLines(mapPath);
+      // Getting the column and row sizes to initialize the mapArray
+      List<String> allLines = LabyrinthFileManager.readMapLines(mapPath);
       int rows = allLines.size();
       int columns = allLines.get(0).length();
       
@@ -166,7 +150,6 @@ public class LabyrinthMap {
           case '\s' -> Element.VOID;
           case 'P' -> Element.PLAYER;
           case 'F' -> Element.END;
-          // This case is specified not to mismatch '*' with OBSTACLE in testing
           case '*' -> Element.TRAVELLED;
           default -> Element.OBSTACLE;
           };  
@@ -174,7 +157,7 @@ public class LabyrinthMap {
       }
       
     // In case of any problem during the process, a personalized exception is thrown  
-    } catch (IndexOutOfBoundsException | IOException e) {
+    } catch (IOException | IndexOutOfBoundsException e) {
       throw new MapException();
     }
   }

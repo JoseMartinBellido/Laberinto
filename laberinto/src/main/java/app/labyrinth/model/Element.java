@@ -1,8 +1,9 @@
 package app.labyrinth.model;
 
 /**
- * Element of the map where the game is played. It can be the player, the end of the map, an obstacle,
- *  a void space where the player can pass over o a space already traveled
+ * Element of the map (labyrinth). It can be the player, the end of the map, an obstacle,
+ *  a void space where the player can pass over o a space already travelled. It will be associated with 
+ *  the character representation in the ASCII map.
  */
 public enum Element {
   PLAYER('P'),

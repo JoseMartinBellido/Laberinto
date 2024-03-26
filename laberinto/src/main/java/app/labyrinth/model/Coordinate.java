@@ -8,7 +8,7 @@ import java.util.Objects;
 public record Coordinate(int x, int y) {
 
   // Redefined hashCode and equals methods to recognize if 2 coordinates are the same if two both
-  // parts are equals
+  // parts X and Y are equals
   
   @Override
   public int hashCode() {

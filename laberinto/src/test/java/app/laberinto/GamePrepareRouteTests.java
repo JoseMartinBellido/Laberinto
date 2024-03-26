@@ -15,7 +15,7 @@ import app.labyrinth.model.Element;
 import app.labyrinth.model.Game;
 import app.labyrinth.model.LabyrinthMap;
 
-class GameTests {
+class GamePrepareRouteTests {
   
   /**
    * Mocked game to execute the getTotalTimeSpentTest
@@ -37,10 +37,10 @@ class GameTests {
         
     // Mocking the map class and the getElementCoordinates methods
     map = Mockito.mock(LabyrinthMap.class);
-    Mockito.when(map.getElementCoordinates(Element.PLAYER))
+    Mockito.when(map.getCoordinateOfElement(Element.PLAYER))
       .thenReturn(new Coordinate(1, 1));
     
-    Mockito.when(map.getElementCoordinates(Element.END))
+    Mockito.when(map.getCoordinateOfElement(Element.END))
       .thenReturn(new Coordinate(6, 6));
     
     route = new ArrayList<>();

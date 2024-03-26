@@ -2,6 +2,7 @@ package app.laberinto;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -9,11 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
+import app.labyrinth.controller.LabyrinthFileManager;
 import app.labyrinth.model.Coordinate;
 import app.labyrinth.model.Element;
 import app.labyrinth.model.LabyrinthMap;
 import app.labyrinth.model.MovementDirection;
-import app.labyrinth.model.exeptions.MapException;
+import app.labyrinth.model.exceptions.MapException;
 
 /**
  * Set of Map class tests that verifies its correct functioning
@@ -46,14 +48,14 @@ class MapTests {
   
   /**
    * Checks if the size of the given map for testing is correct
+   * @throws IOException In case an error occurs during the process
    */
   @Test
-  void mapSizeTest() {
-    LabyrinthMap map = new LabyrinthMap(TESTING_MAP_PATH);
+  void mapSizeTest() throws IOException {
     
     // Checks the read lines given the map
-    assertEquals(3, map.getMapLines().size());
-    assertEquals(11, map.getMapLines().get(0).length());
+    assertEquals(3, LabyrinthFileManager.readMapLines(TESTING_MAP_PATH).size());
+    assertEquals(11, LabyrinthFileManager.readMapLines(TESTING_MAP_PATH).get(0).length());
   }
   
   /**
@@ -90,7 +92,7 @@ class MapTests {
     // Checks the element coordinates of the player and the end
     Element element = Element.valueOf(elementStr);
     
-    assertEquals(new Coordinate(x, y), map.getElementCoordinates(element));
+    assertEquals(new Coordinate(x, y), map.getCoordinateOfElement(element));
   }
   
   
@@ -99,11 +101,10 @@ class MapTests {
     LabyrinthMap map = new LabyrinthMap(TESTING_MAP_PATH);
     
     // Getting the player to look around
-    Coordinate player = map.getElementCoordinates(Element.PLAYER);
+    Coordinate player = map.getCoordinateOfElement(Element.PLAYER);
     Map<MovementDirection, Element> surroundingElements = map.getSurroundingElements(player);
     
     // Check all the elements
-
     // UP
     assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.UP));
     assertEquals(Element.OBSTACLE, surroundingElements.get(MovementDirection.UP_RIGHT));
