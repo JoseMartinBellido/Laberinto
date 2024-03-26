@@ -16,9 +16,13 @@ El juego consiste en diseñar una estrategia con el proyecto base y rellenar el 
 
 ## Instrucciones de uso
 
-1. Se podrá ver el código completo y el mapa, incluida una solución ejemplo de resolución del juego, aunque por supuesto ésta no es la única.
+1. Se podrá ver el código completo y el mapa, incluida una solución ejemplo de resolución del juego[^1], aunque por supuesto ésta no es la única.
 2. Se requiere la escritura del método `calculateRoute()` que realice la lógica interna del jugador para alcanzar el final del laberinto en el menor tiempo posible.
 3. Evidentemente, se pueden realizar muchas rutas de reconocimiento por el mapa para averiguar el camino más rápido, pero debe tenerse en cuenta que el método con la solución más óptima no siempre es aquella que realiza los cálculos más rápidos. Se requiere, por tanto, un equilibrio entre ambas.
 
 ## Ejemplo de laberinto a resolver
 ![Ejemplo de laberinto](https://github.com/JoseMartinBellido/Laberinto/blob/main/Laberinto.png)
+
+### Notas al pie
+
+[^1]: Anímate a resolverlo sin mirar la solución proporcionada, aunque siempre se le puede echar un vistazo para coger ideas :wink:
