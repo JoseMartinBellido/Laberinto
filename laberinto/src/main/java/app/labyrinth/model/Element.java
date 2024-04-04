@@ -6,22 +6,22 @@ package app.labyrinth.model;
  *  the character representation in the ASCII map.
  */
 public enum Element {
-  PLAYER('P'),
-  OBSTACLE((char) Character.OTHER_SYMBOL),
-  END('F'),
-  VOID('\s'),
-  TRAVELLED('*');
+  PLAYER(new char[]{'P'}),
+  OBSTACLE(new char[]{'|', '-', '+'}),
+  END(new char[]{'F'}),
+  VOID(new char[]{'\s'}),
+  TRAVELLED(new char[]{'*'});
   
   /**
    * Representation of the enum in the map
    */
-  private char representation;
+  private char[] representation;
   
   /**
    * Constructor of the enum with the representation 
    * @param representation Representation of the element in the map
    */
-  Element(char representation) {
+  Element(char[] representation) {
     this.representation = representation;
   }
 
@@ -29,7 +29,7 @@ public enum Element {
    * Gets the representation of the element
    * @return The representation of the element
    */
-  public char getRepresentation() {
+  public char[] getRepresentation() {
     return representation;
   }
   
